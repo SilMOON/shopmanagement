@@ -14,8 +14,8 @@ public class ShopItem {
     private String description;
     private Integer price;
     private String item_image_url;
-    private Date created_at;
-    private Date updated_at;
+    private String created_at;
+    private String updated_at;
 
     public void setTitle(String title) {
         this.title = title;
@@ -49,19 +49,19 @@ public class ShopItem {
         return item_image_url;
     }
 
-    public Date getCreated_at() {
+    public String getCreated_at() {
         return created_at;
     }
 
-    public void setCreated_at(Date created_at) {
+    public void setCreated_at(String created_at) {
         this.created_at = created_at;
     }
 
-    public Date getUpdated_at() {
+    public String getUpdated_at() {
         return updated_at;
     }
 
-    public void setUpdated_at(Date updated_at) {
+    public void setUpdated_at(String updated_at) {
         this.updated_at = updated_at;
     }
 }
