@@ -4,10 +4,80 @@
 <head>
     <meta charset="UTF-8">
     <title>Shop Management</title>
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 </head>
 
 <body>
+<el-container>
+    <el-header>
 
+    </el-header>
+
+</el-container>
+
+<el-container>
+    <el-aside width="200px">
+        <el-col :span="12">
+            <el-menu default-active="activeIndex" class="el-menu-vertical-demo" @open="handleOpen" @close="handleClose">
+                <el-menu-item index="1">
+                    <i class="el-icon-menu"></i>
+                    <span slot="title">HomePage</span>
+                </el-menu-item>
+                <el-menu-item index="2" disabled>
+                    <i class="el-icon-setting"></i>
+                    <span slot="title">My Account</span>
+                </el-menu-item>
+            </el-menu>
+        </el-col>
+    </el-aside>
+    <el-main>
+        <ul id="goodsList">
+            <li v-for="item in items">
+                {{ item.title }}
+            </li>
+        </ul>
+    </el-main>
+</el-container>
+
+
+<el-footer>
+
+</el-footer>
+</el-container>
+
+<script type="text/javascript">
+        var goodsList = new Vue({
+            el: '#goodsList',
+            data() {
+                return {
+                    items: []
+                }
+            },
+            mounted: function() {
+                axios.get('http://localhost:8080/itemList')
+                    .then(res => {
+                        this.items = res.data
+                    })
+                    .catch(err => {
+                        console.error(err);
+                    })
+            },
+        })
+
+        export default {
+            methods: {
+                handleOpen(key, keyPath) {
+                    console.log(key, keyPath);
+                },
+                handleClose(key, keyPath) {
+                    console.log(key, keyPath);
+                }
+            }
+        }
+    </script>
 </body>
 
 </html>

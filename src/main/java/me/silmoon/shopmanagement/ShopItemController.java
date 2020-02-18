@@ -1,18 +1,16 @@
 package me.silmoon.shopmanagement;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
+import org.springframework.http.HttpStatus;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
-@Controller
+@RestController
 public class ShopItemController {
     @Autowired
     private ShopItemRepo shopItemRepo;
@@ -22,25 +20,38 @@ public class ShopItemController {
         return "index";
     }
 
-    @GetMapping("/v1/items?title={itemName}")
+    @GetMapping("/itemList")
+    public ArrayList<ShopItem> listItems() {
+        ArrayList<ShopItem> itemList = new ArrayList<ShopItem>();
+        for (ShopItem shopItem : shopItemRepo.findAll())
+            itemList.add(shopItem);
+        return itemList;
+    }
+
+    @GetMapping("/items?title={itemName}")
     public String searchItem(Model model) {
         return "index";
     }
 
-    @PostMapping("/api/v1/items")
-    public @ResponseBody String addNewItem(@RequestParam String title, @RequestParam String description, @RequestParam Integer price,
-                                           @RequestParam String item_image_url, @RequestParam Date created_at)
+    @PostMapping("/addItems")
+    public String addNewItem(@RequestParam String title, @RequestParam String description, @RequestParam Integer price,
+                                           @RequestParam String item_image_url)
     {
         ShopItem newItem = new ShopItem();
         if (title.length()>100 || description.length()>500)
-            return "";  //todo: return an error code
+            return HttpStatus.NOT_FOUND.toString();
 
         newItem.setTitle(title);
         newItem.setDescription(description);
+        newItem.setPrice(price);
+        newItem.setItem_image_url(item_image_url);
         Date now = new Date();
         DateFormat dFormat = new SimpleDateFormat("yyyy-mm-ddTHH:mm:ss:SSSZ");  //todo: format check
         newItem.setCreated_at(dFormat.format(now));
-        return "";
+        newItem.setUpdated_at(dFormat.format(now));
+
+        shopItemRepo.save(newItem);
+        return "redirect:/";
     }
 
 }

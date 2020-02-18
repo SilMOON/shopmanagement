@@ -4,18 +4,26 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import java.util.Date;
 
 @Entity
 public class ShopItem {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
+    private Integer id;
     private String title;
     private String description;
     private Integer price;
     private String item_image_url;
     private String created_at;
     private String updated_at;
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
 
     public void setTitle(String title) {
         this.title = title;
