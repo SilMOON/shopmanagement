@@ -1,11 +1,17 @@
 package me.silmoon.shopmanagement;
 
+import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
+import java.io.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -13,6 +19,13 @@ import java.util.Vector;
 
 @RestController
 public class ShopItemController {
+    private final StorageService storageService;
+
+    @Autowired
+    public ShopItemController(StorageService storageService) {
+        this.storageService = storageService;
+    }
+
     @Autowired
     private ShopItemRepo shopItemRepo;
 
@@ -37,6 +50,20 @@ public class ShopItemController {
         return resultList;
     }
 
+    @GetMapping("/goodsimg/{filename:.+}")
+    public ResponseEntity<Resource> serveFile(@PathVariable String filename) {
+
+        Resource file = storageService.loadAsResource(filename);
+        return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION,
+                "attachment; filename=\"" + file.getFilename() + "\"").body(file);
+    }
+
+    @PostMapping("/uploadImg")
+    public String uploadImg(@RequestParam Integer id, @RequestParam("image") MultipartFile image) throws IOException {
+        storageService.store(image);
+        return "Successful";
+    }
+
     @PostMapping("/addItem")
     public String addNewItem(@RequestParam String title, @RequestParam String description, @RequestParam Integer price,
                                            @RequestParam String item_image_url)
@@ -55,7 +82,7 @@ public class ShopItemController {
         newItem.setUpdated_at(dFormat.format(now));
 
         shopItemRepo.save(newItem);
-        return "redirect:/";
+        return "successful";
     }
 
     @PutMapping("/editItem?id={itemId}")
@@ -80,7 +107,7 @@ public class ShopItemController {
         editItem.setUpdated_at(dFormat.format(now));
 
         shopItemRepo.save(editItem);
-        return "redirect:/";
+        return "successful";
     }
 
 }
