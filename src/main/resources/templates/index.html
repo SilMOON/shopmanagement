@@ -45,7 +45,20 @@
     <el-main>
         <ul id="goodsList">
             <li v-for="item in items">
-                {{ item.title }} {{ item.description }} {{ item.price }}
+                {{ item.title }} <br> {{ item.description }} <br> {{ item.price }} <br>
+
+                <form action="/editItem?id=3">
+                    <input type="text" name="title">
+                    <input type="text" name="description">
+                    <input type="text" name="price">
+                    <input type="text" name="item_image_url">
+                    <input type="submit" formmethod="post" value="Submit">
+                </form>
+
+                <form method="POST" action="/uploadImage" enctype="multipart/form-data">
+                    <input type="file" name="image"/> <br/><br/>
+                    <button type="submit">Submit</button>
+                </form>
             </li>
         </ul>
     </el-main>
