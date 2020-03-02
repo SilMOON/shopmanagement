@@ -11,6 +11,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Vector;
 
 @RestController
@@ -33,13 +34,22 @@ public class ShopItemController {
             itemList.add(shopItem);
         return itemList;
     }
-
-    @GetMapping("/search?title={itemTitle}")
-    public Vector<ShopItem> searchItem(@RequestParam("itemTitle") String itemTitle) {
+    // e.g. http://localhost:8080/search?title=test
+    @GetMapping("/search")
+    public Vector<ShopItem> searchItem(@RequestParam("title") String itemTitle) {
         Vector<ShopItem> resultList = new Vector<ShopItem>();
         for (ShopItem shopItem : shopItemRepo.findAllByTitle(itemTitle))
             resultList.add(shopItem);
         return resultList;
+    }
+
+    @PostMapping("/deleteItem")
+    public String deleteToDoItem(@RequestParam Integer targetId) {
+        Optional<ShopItem> targetItem = shopItemRepo.findById(targetId);
+        if (targetItem.isEmpty())
+            return "not found";
+        shopItemRepo.delete(targetItem.get());
+        return "successful";
     }
 
     @PostMapping("/addItem")

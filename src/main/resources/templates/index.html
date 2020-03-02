@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html style="height: 100%;">
 
 <head>
     <meta charset="UTF-8">
@@ -8,67 +8,112 @@
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
     <script src="https://unpkg.com/element-ui@2.13.0/lib/index.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        .bottom {
+            margin-top: 13px;
+            line-height: 12px;
+        }
+
+        .image {
+            display: block;
+        }
+    </style>
+
 </head>
 
-<body>
-<el-container>
-    <el-header>
-        <div id="navApp">
-            <el-menu :default-active="activeIndex" class="el-menu-demo" mode="horizontal" @select="handleSelect">
-                <el-menu-item index="1">Shop Management System</el-menu-item>
-                <el-menu-item index="2" disabled>Login</el-menu-item>
+<body style="height: 100%;">
+
+<el-header>
+    <div id="navApp">
+        <el-menu :default-active="activeIndex" mode="horizontal" @select="handleSelect">
+            <el-row>
+                <el-col :span="2.5">
+                    <el-menu-item index="1">Shop Management System</el-menu-item>
+                </el-col>
+                <el-col :span="2.5">
+                    <el-menu-item index="2" disabled>Login</el-menu-item>
+                </el-col>
+                <el-col :span="5" :offset="15" style="margin-top: 10px;">
+                    <div id="searchBar">
+                        <el-input placeholder="Which item are you looking for?" v-model="input" size="small" clearable>
+                            <el-button slot="append" icon="el-icon-search"></el-button>
+                        </el-input>
+                    </div>
+                </el-col>
+            </el-row>
+        </el-menu>
+    </div>
+</el-header>
+
+<el-container style="height: 100%;">
+    <el-aside width="200px" style="height: 100%;">
+            <span id="sideBarApp" style="height: 100%;">
+                <el-col :span="3" style="height: 100%;">
+                    <el-menu default-active="activeIndex" class="el-menu-vertical-demo" @open="handleOpen" @close="handleClose">
+                        <el-menu-item index="1">
+                            <i class="el-icon-menu"></i>
+                            <span slot="title">HomePage</span>
+            </el-menu-item>
+            <el-menu-item index="2" disabled>
+                <i class="el-icon-setting"></i>
+                <span slot="title">My Account</span>
+            </el-menu-item>
             </el-menu>
-        </div>
-
-    </el-header>
-
-</el-container>
-
-<el-container>
-    <el-aside width="200px">
-        <div id="sideBarApp">
-            <el-col :span="3">
-                <el-menu default-active="activeIndex" class="el-menu-vertical-demo" @open="handleOpen" @close="handleClose">
-                    <el-menu-item index="1">
-                        <i class="el-icon-menu"></i>
-                        <span slot="title">HomePage</span>
-                    </el-menu-item>
-                    <el-menu-item index="2" disabled>
-                        <i class="el-icon-setting"></i>
-                        <span slot="title">My Account</span>
-                    </el-menu-item>
-                </el-menu>
             </el-col>
-
-        </div>
+            </span>
     </el-aside>
-    <el-main>
-        <ul id="goodsList">
-            <li v-for="item in items">
-                {{ item.title }} <br> {{ item.description }} <br> {{ item.price }} <br>
 
-                <form action="/editItem?id=3">
-                    <input type="text" name="title">
-                    <input type="text" name="description">
-                    <input type="text" name="price">
-                    <input type="text" name="item_image_url">
-                    <input type="submit" formmethod="post" value="Submit">
-                </form>
 
-                <form method="POST" action="/uploadImage" enctype="multipart/form-data">
-                    <input type="file" name="image"/> <br/><br/>
-                    <button type="submit">Submit</button>
-                </form>
-            </li>
-        </ul>
-    </el-main>
+    <el-container>
+        <el-main>
+            <ul id="goodsList" style="list-style-type:none;">
+                <el-row :gutter="20">
+                    <li v-for="item in items">
+                        <el-col :span="6">
+                            <el-card :body-style="{ padding: '0px' }" shadow="hover">
+                                <img v-bind:src="item.item_image_url" class="image">
+
+                                <div style="padding: 14px;">
+                                    <h4 style="text-align: center; margin-top:5px; margin-bottom:5px;">{{ item.title }}</h4>
+                                    <div style="text-align: center;">Price: {{ item.price }}</div>
+                                    <div>{{ item.description }}</div>
+                                    <div class="bottom">
+                                        <el-row>
+                                            <el-col :span="2" :offset="3">
+                                                <el-button type="danger" icon="el-icon-delete" v-on:click="deleteItem" v-bind:id="item.id" circle></el-button>
+                                            </el-col>
+                                            <el-col :span="2" :offset="13">
+                                                <el-button type="primary" icon="el-icon-edit" circle></el-button>
+                                            </el-col>
+                                        </el-row>
+                                    </div>
+                                </div>
+                            </el-card>
+                        </el-col>
+                    </li>
+
+                </el-row>
+            </ul>
+
+            <form action="/editItem?id=3">
+                <input type="text" name="title">
+                <input type="text" name="description">
+                <input type="text" name="price">
+                <input type="text" name="item_image_url">
+                <input type="submit" formmethod="post" value="Submit">
+            </form>
+
+            <form method="post" action="/uploadImage" enctype="multipart/form-data">
+                <input type="file" name="image" /> <br/><br/>
+                <button type="submit">Submit</button>
+            </form>
+
+        </el-main>
+    </el-container>
 </el-container>
 
 
-<el-footer>
 
-</el-footer>
-</el-container>
 
 <script type="text/javascript">
         var goodsList = new Vue({
@@ -87,6 +132,23 @@
                         console.error(err);
                     })
             },
+            methods: {
+                deleteItem: function() {
+                    axios.post('/deleteItem', {
+                            targetId: this.id
+                        })
+                        .then(function(response) {
+                            console.log(response);
+                        })
+                        .catch(function(error) {
+                            console.log(error);
+                        });
+                },
+
+                test: function() {
+                    console.log(this.id)
+                },
+            }
         })
 
         var SideBar = {
@@ -116,6 +178,16 @@
         }
         var Ctor = Vue.extend(Nav)
         new Ctor().$mount('#navApp')
+
+        var SearchBar = {
+            data() {
+                return {
+                    input: ''
+                }
+            }
+        }
+        var Ctor = Vue.extend(SearchBar)
+        new Ctor().$mount('#searchBar')
     </script>
 </body>
 

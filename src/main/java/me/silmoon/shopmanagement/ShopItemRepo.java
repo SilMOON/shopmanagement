@@ -10,7 +10,7 @@ import java.util.Vector;
 @Transactional
 @Repository
 public interface ShopItemRepo extends CrudRepository<ShopItem, Integer> {
-    @Query("from ShopItem where title like ?1")
+    @Query("from ShopItem where title like CONCAT('%',:title,'%')")
     public Iterable<ShopItem> findAllByTitle(String title);
 
 }
