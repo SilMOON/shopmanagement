@@ -13,7 +13,7 @@
             margin-top: 13px;
             line-height: 12px;
         }
-
+        
         .image {
             display: block;
         }
@@ -23,30 +23,28 @@
 
 <body style="height: 100%;">
 
-<el-header>
-    <div id="navApp">
-        <el-menu :default-active="activeIndex" mode="horizontal" @select="handleSelect">
-            <el-row>
-                <el-col :span="2.5">
-                    <el-menu-item index="1">Shop Management System</el-menu-item>
-                </el-col>
-                <el-col :span="2.5">
-                    <el-menu-item index="2" disabled>Login</el-menu-item>
-                </el-col>
-                <el-col :span="5" :offset="15" style="margin-top: 10px;">
-                    <div id="searchBar">
+    <el-header>
+        <div id="navApp">
+            <el-menu :default-active="activeIndex" mode="horizontal" @select="handleSelect">
+                <el-row>
+                    <el-col :span="2.5">
+                        <el-menu-item index="1">Shop Management System</el-menu-item>
+                    </el-col>
+                    <el-col :span="2.5">
+                        <el-menu-item index="2" disabled>Login</el-menu-item>
+                    </el-col>
+                    <el-col :span="5" :offset="15" style="margin-top: 10px;">
                         <el-input placeholder="Which item are you looking for?" v-model="input" size="small" clearable>
                             <el-button slot="append" icon="el-icon-search"></el-button>
                         </el-input>
-                    </div>
-                </el-col>
-            </el-row>
-        </el-menu>
-    </div>
-</el-header>
+                    </el-col>
+                </el-row>
+            </el-menu>
+        </div>
+    </el-header>
 
-<el-container style="height: 100%;">
-    <el-aside width="200px" style="height: 100%;">
+    <el-container style="height: 100%;">
+        <el-aside width="200px" style="height: 100%;">
             <span id="sideBarApp" style="height: 100%;">
                 <el-col :span="3" style="height: 100%;">
                     <el-menu default-active="activeIndex" class="el-menu-vertical-demo" @open="handleOpen" @close="handleClose">
@@ -61,92 +59,108 @@
             </el-menu>
             </el-col>
             </span>
-    </el-aside>
+        </el-aside>
 
 
-    <el-container>
-        <el-main>
-            <ul id="goodsList" style="list-style-type:none;">
-                <el-row :gutter="20">
-                    <li v-for="item in items">
-                        <el-col :span="6">
-                            <el-card :body-style="{ padding: '0px' }" shadow="hover">
-                                <img v-bind:src="item.item_image_url" class="image">
+        <el-container>
+            <el-main>
+                <ul id="goodsList" style="list-style-type:none;">
+                    <el-row :gutter="20">
+                        <li v-for="item in items">
+                            <el-col :span="6">
+                                <el-card :body-style="{ padding: '0px' }" shadow="hover">
+                                    <img v-bind:src="item.item_image_url" class="image">
 
-                                <div style="padding: 14px;">
-                                    <h4 style="text-align: center; margin-top:5px; margin-bottom:5px;">{{ item.title }}</h4>
-                                    <div style="text-align: center;">Price: {{ item.price }}</div>
-                                    <div>{{ item.description }}</div>
-                                    <div class="bottom">
-                                        <el-row>
-                                            <el-col :span="2" :offset="3">
-                                                <el-button type="danger" icon="el-icon-delete" v-on:click="deleteItem" v-bind:id="item.id" circle></el-button>
-                                            </el-col>
-                                            <el-col :span="2" :offset="13">
-                                                <el-button type="primary" icon="el-icon-edit" circle></el-button>
-                                            </el-col>
-                                        </el-row>
+                                    <div style="padding: 14px;">
+                                        <h4 style="text-align: center; margin-top:5px; margin-bottom:5px;">{{ item.title }}</h4>
+                                        <div style="text-align: center;">Price: {{ item.price }}</div>
+                                        <div>{{ item.description }}</div>
+                                        <div class="bottom">
+                                            <el-row>
+                                                <el-col :span="2" :offset="3">
+                                                    <el-button type="danger" icon="el-icon-delete" v-on:click="deleteItem" v-bind:id="item.id" circle></el-button>
+                                                </el-col>
+                                                <el-col :span="2" :offset="13">
+                                                    <el-button type="primary" icon="el-icon-edit" @click="dialogVisible = true" circle></el-button>
+                                                    <el-dialog title="Edit item" :visible.sync="dialogVisible" width="40%" :before-close="handleClose">
+                                                        <form action="/editItem?id=3" id="editForm">
+                                                            <h4>Title: <input type="text" name="title" v-bind:placeholder="item.title"> Price: <input type="text" name="price" v-bind:placeholder="item.price"></h4>
+                                                            <h4></h4>
+                                                            <h4>Description: <textarea name="description" form="editForm">{{ item.description }}</textarea></h4>
+                                                            <input type="text" name="item_image_url">
+                                                            <input type="submit" formmethod="post" value="Submit">
+                                                        </form>
+                                                    </el-dialog>
+                                                </el-col>
+                                            </el-row>
+                                        </div>
                                     </div>
-                                </div>
-                            </el-card>
-                        </el-col>
-                    </li>
+                                </el-card>
+                            </el-col>
+                        </li>
 
-                </el-row>
-            </ul>
+                    </el-row>
+                </ul>
 
-            <form action="/editItem?id=3">
-                <input type="text" name="title">
-                <input type="text" name="description">
-                <input type="text" name="price">
-                <input type="text" name="item_image_url">
-                <input type="submit" formmethod="post" value="Submit">
-            </form>
 
-            <form method="post" action="/uploadImage" enctype="multipart/form-data">
-                <input type="file" name="image" /> <br/><br/>
-                <button type="submit">Submit</button>
-            </form>
 
-        </el-main>
+                <form method="post" action="/uploadImage" enctype="multipart/form-data">
+                    <input type="file" name="image" /> <br/><br/>
+                    <button type="submit">Submit</button>
+                </form>
+
+            </el-main>
+        </el-container>
     </el-container>
-</el-container>
 
 
 
 
-<script type="text/javascript">
+    <script type="text/javascript">
         var goodsList = new Vue({
             el: '#goodsList',
             data() {
                 return {
-                    items: []
+                    items: [],
+                    dialogVisible: false
                 }
             },
             mounted: function() {
-                axios.get('http://localhost:8080/itemList')
+                axios.get('/itemList')
                     .then(res => {
                         this.items = res.data
                     })
                     .catch(err => {
                         console.error(err);
-                    })
+                    });
             },
             methods: {
                 deleteItem: function() {
-                    axios.post('/deleteItem', {
-                            targetId: this.id
+                    var currentId = event.currentTarget.id;
+                    console.log(currentId);
+                    const postInfo = new URLSearchParams();
+                    postInfo.append('targetId', currentId);
+
+                    axios.post('/deleteItem', postInfo)
+                        .then(res => {
+                            axios.get('/itemList')
+                                .then(res => {
+                                    this.items = res.data
+                                })
+                                .catch(err => {
+                                    console.error(err);
+                                });
                         })
-                        .then(function(response) {
-                            console.log(response);
-                        })
-                        .catch(function(error) {
-                            console.log(error);
+                        .catch(err => {
+                            console.error(err);
                         });
                 },
-
-                test: function() {
-                    console.log(this.id)
+                handleClose(done) {
+                    this.$confirm('Exit the editing?')
+                        .then(_ => {
+                            done();
+                        })
+                        .catch(_ => {});
                 },
             }
         })
@@ -167,7 +181,8 @@
         var Nav = {
             data() {
                 return {
-                    activeIndex: '1'
+                    activeIndex: '1',
+                    input: ''
                 };
             },
             methods: {
@@ -178,16 +193,6 @@
         }
         var Ctor = Vue.extend(Nav)
         new Ctor().$mount('#navApp')
-
-        var SearchBar = {
-            data() {
-                return {
-                    input: ''
-                }
-            }
-        }
-        var Ctor = Vue.extend(SearchBar)
-        new Ctor().$mount('#searchBar')
     </script>
 </body>
 

@@ -44,8 +44,9 @@ public class ShopItemController {
     }
 
     @PostMapping("/deleteItem")
-    public String deleteToDoItem(@RequestParam Integer targetId) {
-        Optional<ShopItem> targetItem = shopItemRepo.findById(targetId);
+    public String deleteToDoItem(@RequestParam String targetId) {
+        int tId = Integer.parseInt(targetId);
+        Optional<ShopItem> targetItem = shopItemRepo.findById(tId);
         if (targetItem.isEmpty())
             return "not found";
         shopItemRepo.delete(targetItem.get());
