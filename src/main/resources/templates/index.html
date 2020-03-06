@@ -17,6 +17,33 @@
         .image {
             display: block;
         }
+        
+        .image-uploader .el-upload {
+            border: 1px dashed #d9d9d9;
+            border-radius: 6px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .image-uploader .el-upload:hover {
+            border-color: #409EFF;
+        }
+        
+        .image-uploader-icon {
+            font-size: 28px;
+            color: #8c939d;
+            width: 178px;
+            height: 178px;
+            line-height: 178px;
+            text-align: center;
+        }
+        
+        .image {
+            width: 178px;
+            height: 178px;
+            display: block;
+        }
     </style>
 
 </head>
@@ -52,7 +79,11 @@
                             <i class="el-icon-menu"></i>
                             <span slot="title">HomePage</span>
             </el-menu-item>
-            <el-menu-item index="2" disabled>
+            <el-menu-item index="2">
+                <i class="el-icon-document"></i>
+                <span slot="title">Add new item</span>
+            </el-menu-item>
+            <el-menu-item index="3" disabled>
                 <i class="el-icon-setting"></i>
                 <span slot="title">My Account</span>
             </el-menu-item>
@@ -64,12 +95,12 @@
 
         <el-container>
             <el-main>
-                <ul id="goodsList" style="list-style-type:none;">
-                    <el-row :gutter="20">
+                <el-row :gutter="20">
+                    <ul id="goodsList" style="list-style-type:none;">
                         <li v-for="item in items">
                             <el-col :span="6">
                                 <el-card :body-style="{ padding: '0px' }" shadow="hover">
-                                    <img v-bind:src="item.item_image_url" class="image">
+                                    <img :src="item.item_image_url" class="image" :title="item.title">
 
                                     <div style="padding: 14px;">
                                         <h4 style="text-align: center; margin-top:5px; margin-bottom:5px;">{{ item.title }}</h4>
@@ -78,19 +109,10 @@
                                         <div class="bottom">
                                             <el-row>
                                                 <el-col :span="2" :offset="3">
-                                                    <el-button type="danger" icon="el-icon-delete" v-on:click="deleteItem" v-bind:id="item.id" circle></el-button>
+                                                    <el-button type="danger" icon="el-icon-delete" @click="deleteItem" :id="item.id" circle></el-button>
                                                 </el-col>
                                                 <el-col :span="2" :offset="13">
-                                                    <el-button type="primary" icon="el-icon-edit" @click="dialogVisible = true" circle></el-button>
-                                                    <el-dialog title="Edit item" :visible.sync="dialogVisible" width="40%" :before-close="handleClose">
-                                                        <form action="/editItem?id=3" id="editForm">
-                                                            <h4>Title: <input type="text" name="title" v-bind:placeholder="item.title"> Price: <input type="text" name="price" v-bind:placeholder="item.price"></h4>
-                                                            <h4></h4>
-                                                            <h4>Description: <textarea name="description" form="editForm">{{ item.description }}</textarea></h4>
-                                                            <input type="text" name="item_image_url">
-                                                            <input type="submit" formmethod="post" value="Submit">
-                                                        </form>
-                                                    </el-dialog>
+                                                    <el-button type="primary" icon="el-icon-edit" @click="dialogVisible=true;currentItem=JSON.parse(JSON.stringify(item))" circle></el-button>
                                                 </el-col>
                                             </el-row>
                                         </div>
@@ -99,15 +121,34 @@
                             </el-col>
                         </li>
 
-                    </el-row>
-                </ul>
+                        <el-dialog id="editForm" title="Edit item" :visible.sync="dialogVisible" width="40%" :before-close="handleClose">
+                            <el-form :model="currentItem" label-width="80px">
+
+                                <el-upload class="image-uploader" action="/uploadImage" name="image" :show-file-list="false" :on-success="handleUploadSuccess" :before-upload="beforeUpload">
+                                    <img v-if="currentItem.item_image_url" :src="currentItem.item_image_url" class="image">
+                                    <i v-else class="el-icon-plus image-uploader-icon"></i>
+                                </el-upload>
+
+                                <el-form-item label="Title">
+                                    <el-input v-model="currentItem.title"></el-input>
+                                </el-form-item>
+                                <el-form-item label="Price">
+                                    <el-input v-model="currentItem.price"></el-input>
+                                </el-form-item>
+                                <el-form-item label="Description">
+                                    <el-input type="textarea" v-model="currentItem.description"></el-input>
+                                </el-form-item>
 
 
+                                <el-form-item>
+                                    <el-button @click="dialogVisible = false">Cancel</el-button>
+                                    <el-button type="primary" @click="dialogVisible=false;submitEdit(currentItem)">Submit</el-button>
+                                </el-form-item>
+                            </el-form>
+                        </el-dialog>
 
-                <form method="post" action="/uploadImage" enctype="multipart/form-data">
-                    <input type="file" name="image" /> <br/><br/>
-                    <button type="submit">Submit</button>
-                </form>
+                    </ul>
+                </el-row>
 
             </el-main>
         </el-container>
@@ -122,22 +163,76 @@
             data() {
                 return {
                     items: [],
-                    dialogVisible: false
+                    dialogVisible: false,
+                    currentItem: {
+                        title: '',
+                        description: '',
+                        price: '',
+                        item_image_url: '',
+                        created_at: '',
+                        updated_at: ''
+                    },
+                    form: {}
                 }
             },
             mounted: function() {
                 axios.get('/itemList')
                     .then(res => {
-                        this.items = res.data
+                        this.items = res.data;
                     })
                     .catch(err => {
                         console.error(err);
                     });
             },
             methods: {
+                showEditForm: function(item) {
+                    currentItem = item;
+                    dialogVisible = true;
+                },
+                beforeUpload(file) {
+                    const isJPG = file.type === 'image/jpeg';
+                    const isLt2M = file.size / 1024 / 1024 < 2;
+
+                    if (!isJPG) {
+                        this.$message.error('Please upload JPG file only.');
+                    }
+                    if (!isLt2M) {
+                        this.$message.error('Please upload image smaller than 2MB.');
+                    }
+                    return isJPG && isLt2M;
+                },
+                handleUploadSuccess(res, file) {
+                    const isInvalid = (res === 'File not exists' || res === 'Invalid file');
+                    if (!isInvalid) {
+                        this.currentItem.item_image_url = 'goodsimg/' + res;
+                        this.imageUrl = this.currentItem.item_image_url;
+                    }
+                },
+                submitItemImage: function() {
+
+                },
+                submitEdit: function(item) {
+                    const postInfo = new URLSearchParams();
+                    postInfo.append('title', item.title);
+                    postInfo.append('description', item.description);
+                    postInfo.append('price', item.price);
+                    postInfo.append('item_image_url', item.item_image_url);
+                    axios.post('/editItem?id=' + item.id, postInfo)
+                        .then(res => {
+                            axios.get('/itemList')
+                                .then(res => {
+                                    this.items = res.data;
+                                })
+                                .catch(err => {
+                                    console.error(err);
+                                });
+                        })
+                        .catch(err => {
+                            console.error(err);
+                        });
+                },
                 deleteItem: function() {
                     var currentId = event.currentTarget.id;
-                    console.log(currentId);
                     const postInfo = new URLSearchParams();
                     postInfo.append('targetId', currentId);
 
