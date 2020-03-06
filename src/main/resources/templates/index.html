@@ -55,7 +55,9 @@
             <el-menu :default-active="activeIndex" mode="horizontal" @select="handleSelect">
                 <el-row>
                     <el-col :span="2.5">
-                        <el-menu-item index="1">Shop Management System</el-menu-item>
+                        <el-menu-item index="1">
+                            <a href="/"></a>Shop Management System</a>
+                        </el-menu-item>
                     </el-col>
                     <el-col :span="2.5">
                         <el-menu-item index="2" disabled>Login</el-menu-item>
@@ -74,7 +76,7 @@
         <el-aside width="200px" style="height: 100%;">
             <span id="sideBarApp" style="height: 100%;">
                 <el-col :span="3" style="height: 100%;">
-                    <el-menu default-active="activeIndex" class="el-menu-vertical-demo" @open="handleOpen" @close="handleClose">
+                    <el-menu default-active="activeIndex">
                         <el-menu-item index="1">
                             <i class="el-icon-menu"></i>
                             <span slot="title">HomePage</span>
@@ -122,24 +124,21 @@
                         </li>
 
                         <el-dialog id="editForm" title="Edit item" :visible.sync="dialogVisible" width="40%" :before-close="handleClose">
-                            <el-form :model="currentItem" label-width="80px">
-
+                            <el-form :model="currentItem" :rules="rules" ref="currentItem" label-width="80px">
                                 <el-upload class="image-uploader" action="/uploadImage" name="image" :show-file-list="false" :on-success="handleUploadSuccess" :before-upload="beforeUpload">
                                     <img v-if="currentItem.item_image_url" :src="currentItem.item_image_url" class="image">
                                     <i v-else class="el-icon-plus image-uploader-icon"></i>
                                 </el-upload>
 
-                                <el-form-item label="Title">
+                                <el-form-item label="Title" prop="title">
                                     <el-input v-model="currentItem.title"></el-input>
                                 </el-form-item>
-                                <el-form-item label="Price">
-                                    <el-input v-model="currentItem.price"></el-input>
+                                <el-form-item label="Price" prop="price">
+                                    <el-input type="float" v-model="currentItem.price"></el-input>
                                 </el-form-item>
-                                <el-form-item label="Description">
+                                <el-form-item label="Description" prop="description">
                                     <el-input type="textarea" v-model="currentItem.description"></el-input>
                                 </el-form-item>
-
-
                                 <el-form-item>
                                     <el-button @click="dialogVisible = false">Cancel</el-button>
                                     <el-button type="primary" @click="dialogVisible=false;submitEdit(currentItem)">Submit</el-button>
@@ -172,7 +171,32 @@
                         created_at: '',
                         updated_at: ''
                     },
-                    form: {}
+                    rules: {
+                        title: [{
+                            required: true,
+                            message: 'Please enter a title',
+                            trigger: 'blur'
+                        }, {
+                            min: 1,
+                            max: 100,
+                            message: 'Please keep the length of title less than 100',
+                            trigger: 'blur'
+                        }],
+                        description: [{
+                            required: true,
+                            message: 'Please enter a description',
+                            trigger: 'blur'
+                        }, {
+                            max: 500,
+                            message: 'Please keep the length of description less than 500',
+                            trigger: 'blur'
+                        }],
+                        price: [{
+                            required: true,
+                            message: 'Please enter a price',
+                            trigger: 'blur'
+                        }]
+                    }
                 }
             },
             mounted: function() {
@@ -185,10 +209,6 @@
                     });
             },
             methods: {
-                showEditForm: function(item) {
-                    currentItem = item;
-                    dialogVisible = true;
-                },
                 beforeUpload(file) {
                     const isJPG = file.type === 'image/jpeg';
                     const isLt2M = file.size / 1024 / 1024 < 2;
@@ -212,24 +232,32 @@
 
                 },
                 submitEdit: function(item) {
-                    const postInfo = new URLSearchParams();
-                    postInfo.append('title', item.title);
-                    postInfo.append('description', item.description);
-                    postInfo.append('price', item.price);
-                    postInfo.append('item_image_url', item.item_image_url);
-                    axios.post('/editItem?id=' + item.id, postInfo)
-                        .then(res => {
-                            axios.get('/itemList')
+                    this.$refs['currentItem'].validate((valid) => {
+                        if (valid) {
+                            const postInfo = new URLSearchParams();
+                            postInfo.append('title', item.title);
+                            postInfo.append('description', item.description);
+                            postInfo.append('price', item.price);
+                            postInfo.append('item_image_url', item.item_image_url);
+                            axios.post('/editItem?id=' + item.id, postInfo)
                                 .then(res => {
-                                    this.items = res.data;
+                                    axios.get('/itemList')
+                                        .then(res => {
+                                            this.items = res.data;
+                                        })
+                                        .catch(err => {
+                                            console.error(err);
+                                        });
                                 })
                                 .catch(err => {
                                     console.error(err);
                                 });
-                        })
-                        .catch(err => {
-                            console.error(err);
-                        });
+                        } else {
+                            console.log('error submit!!');
+                            alert("Please submit item as requested!")
+                            return false;
+                        }
+                    });
                 },
                 deleteItem: function() {
                     var currentId = event.currentTarget.id;
@@ -261,6 +289,11 @@
         })
 
         var SideBar = {
+            data() {
+                return {
+                    activeIndex: '1'
+                };
+            },
             methods: {
                 handleOpen(key, keyPath) {
                     console.log(key, keyPath);

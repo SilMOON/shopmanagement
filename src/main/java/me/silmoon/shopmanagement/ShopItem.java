@@ -12,7 +12,7 @@ public class ShopItem {
     private Integer id;
     private String title;
     private String description;
-    private Integer price;
+    private Double price;
     private String item_image_url;
     private String created_at;
     private String updated_at;
@@ -41,11 +41,11 @@ public class ShopItem {
         return description;
     }
 
-    public void setPrice(Integer price) {
+    public void setPrice(Double price) {
         this.price = price;
     }
 
-    public Integer getPrice() {
+    public Double getPrice() {
         return price;
     }
 

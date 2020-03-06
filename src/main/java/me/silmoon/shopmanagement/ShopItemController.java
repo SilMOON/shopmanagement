@@ -54,7 +54,7 @@ public class ShopItemController {
     }
 
     @PostMapping("/addItem")
-    public String addNewItem(@RequestParam String title, @RequestParam String description, @RequestParam Integer price,
+    public String addNewItem(@RequestParam String title, @RequestParam String description, @RequestParam Double price,
                                            @RequestParam String item_image_url)
     {
         ShopItem newItem = new ShopItem();
@@ -77,7 +77,7 @@ public class ShopItemController {
     // e.g. http://localhost:8080/editItem?id=3
     @PostMapping("/editItem")
     public String editItem(@RequestParam("id") String strId, @RequestParam String title,
-                           @RequestParam String description, @RequestParam Integer price, @RequestParam String item_image_url)
+                           @RequestParam String description, @RequestParam Double price, @RequestParam String item_image_url)
     {
         int itemId = Integer.parseInt(strId);
         if (shopItemRepo.findById(itemId).isEmpty())
