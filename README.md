@@ -37,6 +37,8 @@ After that, modify the password to the one you set for the database in `src/main
 spring.datasource.password=Your password
 ```
 
+In the same file, change the `file.upload.path` to the directory you want for file storage.
+
 ### III. Run the project
 Use command line to get into the project's root directory which the `gradlew` program is located in and run: 
 ```

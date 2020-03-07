@@ -24,6 +24,8 @@
             cursor: pointer;
             position: relative;
             overflow: hidden;
+            margin-left: 50%;
+            transform: translateX(-50%);
         }
         
         .image-uploader .el-upload:hover {
@@ -43,6 +45,13 @@
             width: 178px;
             height: 178px;
             display: block;
+        }
+        
+        #newItemButton {
+            text-align: center;
+            position: fixed;
+            right: 90px;
+            bottom: 90px;
         }
     </style>
 
@@ -81,11 +90,7 @@
                             <i class="el-icon-menu"></i>
                             <span slot="title">HomePage</span>
             </el-menu-item>
-            <el-menu-item index="2">
-                <i class="el-icon-document"></i>
-                <span slot="title">Add new item</span>
-            </el-menu-item>
-            <el-menu-item index="3" disabled>
+            <el-menu-item index="2" disabled>
                 <i class="el-icon-setting"></i>
                 <span slot="title">My Account</span>
             </el-menu-item>
@@ -102,7 +107,9 @@
                         <li v-for="item in items">
                             <el-col :span="6">
                                 <el-card :body-style="{ padding: '0px' }" shadow="hover">
-                                    <img :src="item.item_image_url" class="image" :title="item.title">
+                                    <div style="margin-left: 50%;transform: translateX(-40%);">
+                                        <img :src="item.item_image_url" class="image" :title="item.title">
+                                    </div>
 
                                     <div style="padding: 14px;">
                                         <h4 style="text-align: center; margin-top:5px; margin-bottom:5px;">{{ item.title }}</h4>
@@ -114,7 +121,16 @@
                                                     <el-button type="danger" icon="el-icon-delete" @click="deleteItem" :id="item.id" circle></el-button>
                                                 </el-col>
                                                 <el-col :span="2" :offset="13">
-                                                    <el-button type="primary" icon="el-icon-edit" @click="dialogVisible=true;currentItem=JSON.parse(JSON.stringify(item))" circle></el-button>
+                                                    <el-button type="primary" icon="el-icon-edit" @click="dialogVisible=true;formTitle='Edit item';isNew=false;currentItem=JSON.parse(JSON.stringify(item))" circle></el-button>
+                                                </el-col>
+                                            </el-row>
+                                            <el-divider></el-divider>
+                                            <el-row style="font-style: italic; font-size:small; color: #606266;">
+                                                <el-col :span="12">
+                                                    Created at: {{ item.created_at }}
+                                                </el-col>
+                                                <el-col :span="11" :offset="1">
+                                                    Last edited: {{ item.updated_at }}
                                                 </el-col>
                                             </el-row>
                                         </div>
@@ -123,8 +139,8 @@
                             </el-col>
                         </li>
 
-                        <el-dialog id="editForm" title="Edit item" :visible.sync="dialogVisible" width="40%" :before-close="handleClose">
-                            <el-form :model="currentItem" :rules="rules" ref="currentItem" label-width="80px">
+                        <el-dialog id="editForm" :title="formTitle" :visible.sync="dialogVisible" width="40%" :before-close="handleClose">
+                            <el-form :model="currentItem" :rules="rules" ref="currentItem" label-width="100px">
                                 <el-upload class="image-uploader" action="/uploadImage" name="image" :show-file-list="false" :on-success="handleUploadSuccess" :before-upload="beforeUpload">
                                     <img v-if="currentItem.item_image_url" :src="currentItem.item_image_url" class="image">
                                     <i v-else class="el-icon-plus image-uploader-icon"></i>
@@ -139,12 +155,16 @@
                                 <el-form-item label="Description" prop="description">
                                     <el-input type="textarea" v-model="currentItem.description"></el-input>
                                 </el-form-item>
-                                <el-form-item>
+                                <el-form-item style="margin-left: 50%;transform: translateX(-50%);">
                                     <el-button @click="dialogVisible = false">Cancel</el-button>
-                                    <el-button type="primary" @click="dialogVisible=false;submitEdit(currentItem)">Submit</el-button>
+                                    <el-button type="primary" @click="dialogVisible=false;submitEdit(currentItem, isNew)">Submit</el-button>
                                 </el-form-item>
                             </el-form>
                         </el-dialog>
+
+                        <div id="newItemButton">
+                            <el-button type="primary" style="font-size: 2rem;" icon="el-icon-circle-plus" circle @click="dialogVisible=true;formTitle='Add new item';isNew=true;currentItem=JSON.parse(JSON.stringify(emptyItem))"></el-button>
+                        </div>
 
                     </ul>
                 </el-row>
@@ -163,6 +183,14 @@
                 return {
                     items: [],
                     dialogVisible: false,
+                    emptyItem: {
+                        title: '',
+                        description: '',
+                        price: '',
+                        item_image_url: '',
+                        created_at: '',
+                        updated_at: ''
+                    },
                     currentItem: {
                         title: '',
                         description: '',
@@ -196,7 +224,9 @@
                             message: 'Please enter a price',
                             trigger: 'blur'
                         }]
-                    }
+                    },
+                    formTitle: '',
+                    isNew: false
                 }
             },
             mounted: function() {
@@ -231,7 +261,7 @@
                 submitItemImage: function() {
 
                 },
-                submitEdit: function(item) {
+                submitEdit: function(item, isNewItem) {
                     this.$refs['currentItem'].validate((valid) => {
                         if (valid) {
                             const postInfo = new URLSearchParams();
@@ -239,7 +269,13 @@
                             postInfo.append('description', item.description);
                             postInfo.append('price', item.price);
                             postInfo.append('item_image_url', item.item_image_url);
-                            axios.post('/editItem?id=' + item.id, postInfo)
+                            var postType;
+                            if (isNewItem) {
+                                postType = '/addItem';
+                            } else {
+                                postType = '/editItem?id=' + item.id;
+                            }
+                            axios.post(postType, postInfo)
                                 .then(res => {
                                     axios.get('/itemList')
                                         .then(res => {

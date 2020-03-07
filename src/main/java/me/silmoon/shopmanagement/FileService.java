@@ -17,10 +17,12 @@ public class FileService {
     @Value("${file.upload.path:${user.home}}")
     public String uploadPath;
 
-    public void uploadFile(MultipartFile file) {
+    public void uploadFile(MultipartFile file, String timestamp) {
         try {
+            String originalName = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
+            String fileExtension = originalName.substring(originalName.lastIndexOf("."));
             Path copyLocation = Paths
-                    .get(uploadPath + File.separator + StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename())));
+                    .get(uploadPath + File.separator + timestamp + fileExtension );
             Files.copy(file.getInputStream(), copyLocation, StandardCopyOption.REPLACE_EXISTING);
         } catch (Exception e) {
             e.printStackTrace();

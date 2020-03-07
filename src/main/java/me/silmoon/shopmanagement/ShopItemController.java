@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
+import java.io.File;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -107,8 +108,13 @@ public class ShopItemController {
             return "File not exists";
         else if (!Objects.requireNonNull(image.getContentType()).equalsIgnoreCase("image/jpeg"))
             return "Invalid file";
+        Date now = new Date();
+        DateFormat dFormat = new SimpleDateFormat("yyyyMMddHHmmssSSS");
+        String timestamp = dFormat.format(now);
+        fileService.uploadFile(image, timestamp);
 
-        fileService.uploadFile(image);
-        return image.getOriginalFilename();
+        String originalName = image.getOriginalFilename();
+        String fileExt = originalName.substring(originalName.lastIndexOf("."));
+        return timestamp+fileExt;
     }
 }
