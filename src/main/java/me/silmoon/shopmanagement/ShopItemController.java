@@ -34,6 +34,7 @@ public class ShopItemController {
             itemList.add(shopItem);
         return itemList;
     }
+
     // e.g. http://localhost:8080/search?title=test
     @GetMapping("/search")
     public Vector<ShopItem> searchItem(@RequestParam("title") String itemTitle) {

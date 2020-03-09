@@ -31,8 +31,8 @@
                         <el-menu-item index="2" disabled>Login</el-menu-item>
                     </el-col>
                     <el-col :span="5" :offset="15" style="margin-top: 10px;">
-                        <el-input placeholder="Which item are you looking for?" v-model="input" size="small" clearable>
-                            <el-button slot="append" icon="el-icon-search"></el-button>
+                        <el-input placeholder="Which item are you looking for?" v-model="input" @keyup.enter.native="search" size="small" clearable>
+                            <el-button slot="append" icon="el-icon-search" @click="search"></el-button>
                         </el-input>
                     </el-col>
                 </el-row>
@@ -105,13 +105,13 @@
                                 </el-upload>
 
                                 <el-form-item label="Title" prop="title">
-                                    <el-input v-model="currentItem.title"></el-input>
+                                    <el-input maxlength="100" v-model="currentItem.title" show-word-limit></el-input>
                                 </el-form-item>
                                 <el-form-item label="Price" prop="price">
                                     <el-input type="float" v-model="currentItem.price"></el-input>
                                 </el-form-item>
                                 <el-form-item label="Description" prop="description">
-                                    <el-input type="textarea" v-model="currentItem.description"></el-input>
+                                    <el-input type="textarea" maxlength="500" v-model="currentItem.description" show-word-limit></el-input>
                                 </el-form-item>
                                 <el-form-item style="margin-left: 50%;transform: translateX(-50%);">
                                     <el-button @click="dialogVisible = false">Cancel</el-button>
@@ -121,7 +121,10 @@
                         </el-dialog>
 
                         <div id="newItemButton">
-                            <el-button type="primary" style="font-size: 2rem;" icon="el-icon-circle-plus" circle @click="dialogVisible=true;formTitle='Add new item';isNew=true;currentItem=JSON.parse(JSON.stringify(emptyItem))"></el-button>
+                            <el-button type="primary" style="font-size: 2rem;" v-if="showNewButton" icon="el-icon-circle-plus" circle @click="dialogVisible=true;formTitle='Add new item';isNew=true;currentItem=JSON.parse(JSON.stringify(emptyItem))"></el-button>
+                        </div>
+                        <div id="newItemButton">
+                            <el-button type="warning" style="font-size: 2rem;" v-if="!showNewButton" icon="el-icon-s-home" circle @click="getList"></el-button>
                         </div>
 
                     </ul>
@@ -138,6 +141,7 @@
                 return {
                     items: [],
                     dialogVisible: false,
+                    showNewButton: true,
                     emptyItem: {
                         title: '',
                         description: '',
@@ -194,6 +198,17 @@
                     });
             },
             methods: {
+                getList: function() {
+                    axios.get('/itemList')
+                        .then(res => {
+                            this.items = res.data;
+                        })
+                        .catch(err => {
+                            console.error(err);
+                        });
+                    this.showNewButton = true;
+                    Nav.input = '';
+                },
                 beforeUpload(file) {
                     const isJPG = file.type === 'image/jpeg';
                     const isLt2M = file.size / 1024 / 1024 < 2;
@@ -276,10 +291,12 @@
             }
         })
 
-        var SideBar = {
+        var SideBar = new Vue({
+            el: '#sideBarApp',
             data() {
                 return {
-                    activeIndex: '1'
+                    activeIndex: '1',
+
                 };
             },
             methods: {
@@ -290,11 +307,11 @@
                     console.log(key, keyPath);
                 }
             }
-        }
-        var Ctor = Vue.extend(SideBar)
-        new Ctor().$mount('#sideBarApp')
 
-        var Nav = {
+        })
+
+        var Nav = new Vue({
+            el: '#navApp',
             data() {
                 return {
                     activeIndex: '1',
@@ -302,13 +319,27 @@
                 };
             },
             methods: {
+                search: function() {
+                    axios.get('/itemList')
+                        .then(res => {
+                            axios.get('/search?title=' + this.input)
+                                .then(res => {
+                                    goodsList.items = res.data;
+                                })
+                                .catch(err => {
+                                    console.error(err);
+                                });
+                        })
+                        .catch(err => {
+                            console.error(err);
+                        });
+                    goodsList.showNewButton = false;
+                },
                 handleSelect(key, keyPath) {
                     console.log(key, keyPath);
                 }
             }
-        }
-        var Ctor = Vue.extend(Nav)
-        new Ctor().$mount('#navApp')
+        })
     </script>
 </body>
 
