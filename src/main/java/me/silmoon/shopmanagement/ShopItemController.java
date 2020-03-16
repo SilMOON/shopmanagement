@@ -22,11 +22,6 @@ public class ShopItemController {
     @Autowired
     FileService fileService;
 
-    @GetMapping("/")
-    public ModelAndView getIndex(Model model) {
-        return new ModelAndView("index");
-    }
-
     @GetMapping("/itemList")
     public Vector<ShopItem> listItems() {
         Vector<ShopItem> itemList = new Vector<ShopItem>();
